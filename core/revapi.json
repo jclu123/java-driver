@@ -4991,6 +4991,31 @@
         "old": "class org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation",
         "new": "class org.apache.tinkerpop.gremlin.process.traversal.util.TraversalExplanation",
         "justification": "Upgrade to Tinkerpop 3.4.4"
+      },
+      {
+        "code": "java.class.nonPublicPartOfAPI",
+        "new": "class com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.Serialization",
+        "justification": "Caused by the exposure of JsonMapper as a parameter in TypeCodecs.json()"
+      },
+      {
+        "code": "java.class.nonPublicPartOfAPI",
+        "new": "class com.fasterxml.jackson.databind.introspect.AnnotatedField.Serialization",
+        "justification": "Caused by the exposure of JsonMapper as a parameter in TypeCodecs.json()"
+      },
+      {
+        "code": "java.class.nonPublicPartOfAPI",
+        "new": "class com.fasterxml.jackson.databind.introspect.AnnotatedMethod.Serialization",
+        "justification": "Caused by the exposure of JsonMapper as a parameter in TypeCodecs.json()"
+      },
+      {
+        "code": "java.class.nonPublicPartOfAPI",
+        "new": "class com.fasterxml.jackson.databind.type.TypeParser.MyTokenizer",
+        "justification": "Caused by the exposure of JsonMapper as a parameter in TypeCodecs.json()"
+      },
+      {
+        "code": "java.class.nonPublicPartOfAPI",
+        "new": "class com.fasterxml.jackson.databind.util.PrimitiveArrayBuilder.Node<T extends java.lang.Object>",
+        "justification": "Caused by the exposure of JsonMapper as a parameter in TypeCodecs.json()"
       }
     ]
   }

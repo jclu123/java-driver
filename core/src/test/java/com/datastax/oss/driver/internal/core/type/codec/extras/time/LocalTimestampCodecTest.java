@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.datastax.oss.driver.internal.core.type.codec;
+package com.datastax.oss.driver.internal.core.type.codec.extras.time;
 
-import static java.time.ZoneOffset.ofHours;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.datastax.oss.driver.api.core.type.codec.TypeCodecs;
 import com.datastax.oss.driver.api.core.type.reflect.GenericType;
+import com.datastax.oss.driver.internal.core.type.codec.CodecTestBase;
+import com.datastax.oss.driver.internal.core.type.codec.TimestampCodecTest;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import java.time.Instant;
@@ -33,91 +34,99 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(DataProviderRunner.class)
-public class ZonedTimestampCodecTest extends CodecTestBase<ZonedDateTime> {
+public class LocalTimestampCodecTest extends CodecTestBase<LocalDateTime> {
 
   @Test
-  @UseDataProvider(value = "timeZones", location = TimestampCodecTest.class)
-  public void should_encode(ZoneId timeZone) {
-    codec = TypeCodecs.zonedTimestampAt(timeZone);
-    assertThat(encode(Instant.EPOCH.atZone(timeZone))).isEqualTo("0x0000000000000000");
-    assertThat(encode(Instant.ofEpochMilli(128).atZone(timeZone))).isEqualTo("0x0000000000000080");
+  public void should_encode() {
+    codec = TypeCodecs.LOCAL_TIMESTAMP_UTC;
+    assertThat(encode(Instant.EPOCH.atZone(ZoneOffset.UTC).toLocalDateTime()))
+        .isEqualTo("0x0000000000000000");
+    assertThat(encode(Instant.ofEpochMilli(128).atZone(ZoneOffset.UTC).toLocalDateTime()))
+        .isEqualTo("0x0000000000000080");
     assertThat(encode(null)).isNull();
   }
 
   @Test
   public void should_decode() {
-    codec = TypeCodecs.ZONED_TIMESTAMP_UTC;
-    assertThat(decode("0x0000000000000000").toInstant().toEpochMilli()).isEqualTo(0);
-    assertThat(decode("0x0000000000000080").toInstant().toEpochMilli()).isEqualTo(128);
+    codec = TypeCodecs.LOCAL_TIMESTAMP_UTC;
+    assertThat(decode("0x0000000000000000"))
+        .isEqualTo(Instant.EPOCH.atZone(ZoneOffset.UTC).toLocalDateTime());
+    assertThat(decode("0x0000000000000080"))
+        .isEqualTo(Instant.ofEpochMilli(128).atZone(ZoneOffset.UTC).toLocalDateTime());
     assertThat(decode(null)).isNull();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void should_fail_to_decode_if_not_enough_bytes() {
-    codec = TypeCodecs.ZONED_TIMESTAMP_SYSTEM;
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
     decode("0x0000");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void should_fail_to_decode_if_too_many_bytes() {
-    codec = TypeCodecs.ZONED_TIMESTAMP_SYSTEM;
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
     decode("0x0000000000000000" + "0000");
   }
 
   @Test
   public void should_format() {
-    codec = TypeCodecs.zonedTimestampAt(ZoneOffset.ofHours(2));
+    codec = TypeCodecs.localTimestampAt(ZoneOffset.ofHours(2));
     // No need to test various values because the codec delegates directly to SimpleDateFormat,
     // which we assume does its job correctly.
-    assertThat(format(Instant.EPOCH.atZone(ZoneOffset.UTC)))
-        .isEqualTo("'1970-01-01T02:00:00.000+02:00'");
-    assertThat(format(ZonedDateTime.parse("2018-08-16T15:59:34.123Z")))
-        .isEqualTo("'2018-08-16T17:59:34.123+02:00'");
+    assertThat(format(LocalDateTime.parse("2018-08-16T16:59:34.123")))
+        .isEqualTo("'2018-08-16T16:59:34.123+02:00'");
     assertThat(format(null)).isEqualTo("NULL");
   }
 
   @Test
   @UseDataProvider(value = "timeZones", location = TimestampCodecTest.class)
-  public void should_parse(ZoneId timeZone) {
-    codec = TypeCodecs.zonedTimestampAt(timeZone);
+  public void should_parse(ZoneId defaultTimeZone) {
+    codec = TypeCodecs.localTimestampAt(defaultTimeZone);
 
     // Raw numbers
-    assertThat(parse("'0'")).isEqualTo(Instant.EPOCH.atZone(timeZone));
-    assertThat(parse("'-1'")).isEqualTo(Instant.EPOCH.minusMillis(1).atZone(timeZone));
+    assertThat(parse("'0'")).isEqualTo(Instant.EPOCH.atZone(defaultTimeZone).toLocalDateTime());
+    assertThat(parse("'-1'"))
+        .isEqualTo(Instant.EPOCH.minusMillis(1).atZone(defaultTimeZone).toLocalDateTime());
     assertThat(parse("1534463100000"))
-        .isEqualTo(Instant.ofEpochMilli(1534463100000L).atZone(timeZone));
+        .isEqualTo(Instant.ofEpochMilli(1534463100000L).atZone(defaultTimeZone).toLocalDateTime());
 
     // Date formats
-    ZonedDateTime expected;
+    LocalDateTime expected;
 
     // date without time, without time zone
-    expected = LocalDate.parse("2017-01-01").atStartOfDay().atZone(timeZone);
+    expected = LocalDate.parse("2017-01-01").atStartOfDay();
     assertThat(parse("'2017-01-01'")).isEqualTo(expected);
 
     // date without time, with time zone
-    expected = LocalDate.parse("2018-08-16").atStartOfDay().atZone(ofHours(2));
+    expected =
+        ZonedDateTime.parse("2018-08-16T00:00:00+02:00")
+            .withZoneSameInstant(defaultTimeZone)
+            .toLocalDateTime();
     assertThat(parse("'2018-08-16+02'")).isEqualTo(expected);
     assertThat(parse("'2018-08-16+0200'")).isEqualTo(expected);
     assertThat(parse("'2018-08-16+02:00'")).isEqualTo(expected);
     assertThat(parse("'2018-08-16 CEST'")).isEqualTo(expected);
 
     // date with time, without time zone
-    expected = LocalDateTime.parse("2018-08-16T23:45").atZone(timeZone);
+    expected = LocalDateTime.parse("2018-08-16T23:45");
     assertThat(parse("'2018-08-16T23:45'")).isEqualTo(expected);
     assertThat(parse("'2018-08-16 23:45'")).isEqualTo(expected);
 
     // date with time + seconds, without time zone
-    expected = LocalDateTime.parse("2019-12-31T16:08:38").atZone(timeZone);
+    expected = LocalDateTime.parse("2019-12-31T16:08:38");
     assertThat(parse("'2019-12-31T16:08:38'")).isEqualTo(expected);
     assertThat(parse("'2019-12-31 16:08:38'")).isEqualTo(expected);
 
     // date with time + seconds + milliseconds, without time zone
-    expected = LocalDateTime.parse("1950-02-28T12:00:59.230").atZone(timeZone);
+    expected = LocalDateTime.parse("1950-02-28T12:00:59.230");
     assertThat(parse("'1950-02-28T12:00:59.230'")).isEqualTo(expected);
     assertThat(parse("'1950-02-28 12:00:59.230'")).isEqualTo(expected);
 
     // date with time, with time zone
-    expected = ZonedDateTime.parse("1973-06-23T23:59:00.000+01:00");
+    expected =
+        ZonedDateTime.parse("1973-06-23T23:59:00.000+01:00")
+            .withZoneSameInstant(defaultTimeZone)
+            .toLocalDateTime();
     assertThat(parse("'1973-06-23T23:59+01'")).isEqualTo(expected);
     assertThat(parse("'1973-06-23T23:59+0100'")).isEqualTo(expected);
     assertThat(parse("'1973-06-23T23:59+01:00'")).isEqualTo(expected);
@@ -128,7 +137,10 @@ public class ZonedTimestampCodecTest extends CodecTestBase<ZonedDateTime> {
     assertThat(parse("'1973-06-23 23:59 CET'")).isEqualTo(expected);
 
     // date with time + seconds, with time zone
-    expected = ZonedDateTime.parse("1980-01-01T23:59:59.000-08:00");
+    expected =
+        ZonedDateTime.parse("1980-01-01T23:59:59.000-08:00")
+            .withZoneSameInstant(defaultTimeZone)
+            .toLocalDateTime();
     assertThat(parse("'1980-01-01T23:59:59-08'")).isEqualTo(expected);
     assertThat(parse("'1980-01-01T23:59:59-0800'")).isEqualTo(expected);
     assertThat(parse("'1980-01-01T23:59:59-08:00'")).isEqualTo(expected);
@@ -139,7 +151,10 @@ public class ZonedTimestampCodecTest extends CodecTestBase<ZonedDateTime> {
     assertThat(parse("'1980-01-01 23:59:59 PST'")).isEqualTo(expected);
 
     // date with time + seconds + milliseconds, with time zone
-    expected = ZonedDateTime.parse("1999-12-31T23:59:59.999+00:00");
+    expected =
+        ZonedDateTime.parse("1999-12-31T23:59:59.999+00:00")
+            .withZoneSameInstant(defaultTimeZone)
+            .toLocalDateTime();
     assertThat(parse("'1999-12-31T23:59:59.999+00'")).isEqualTo(expected);
     assertThat(parse("'1999-12-31T23:59:59.999+0000'")).isEqualTo(expected);
     assertThat(parse("'1999-12-31T23:59:59.999+00:00'")).isEqualTo(expected);
@@ -157,7 +172,7 @@ public class ZonedTimestampCodecTest extends CodecTestBase<ZonedDateTime> {
 
   @Test
   public void should_fail_to_parse_invalid_input() {
-    codec = new ZonedTimestampCodec();
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
     assertThatThrownBy(() -> parse("not a timestamp"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Alphanumeric timestamp literal must be quoted: \"not a timestamp\"");
@@ -168,22 +183,22 @@ public class ZonedTimestampCodecTest extends CodecTestBase<ZonedDateTime> {
 
   @Test
   public void should_accept_generic_type() {
-    codec = new ZonedTimestampCodec();
-    assertThat(codec.accepts(GenericType.of(ZonedDateTime.class))).isTrue();
-    assertThat(codec.accepts(GenericType.of(Integer.class))).isFalse();
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
+    assertThat(codec.accepts(GenericType.LOCAL_DATE_TIME)).isTrue();
+    assertThat(codec.accepts(GenericType.INSTANT)).isFalse();
   }
 
   @Test
   public void should_accept_raw_type() {
-    codec = new ZonedTimestampCodec();
-    assertThat(codec.accepts(ZonedDateTime.class)).isTrue();
-    assertThat(codec.accepts(Integer.class)).isFalse();
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
+    assertThat(codec.accepts(LocalDateTime.class)).isTrue();
+    assertThat(codec.accepts(Instant.class)).isFalse();
   }
 
   @Test
   public void should_accept_object() {
-    codec = new ZonedTimestampCodec();
-    assertThat(codec.accepts(ZonedDateTime.now(ZoneOffset.systemDefault()))).isTrue();
-    assertThat(codec.accepts(Integer.MIN_VALUE)).isFalse();
+    codec = TypeCodecs.LOCAL_TIMESTAMP_SYSTEM;
+    assertThat(codec.accepts(LocalDateTime.now(ZoneId.systemDefault()))).isTrue();
+    assertThat(codec.accepts(Instant.EPOCH)).isFalse();
   }
 }

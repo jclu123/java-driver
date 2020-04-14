@@ -101,9 +101,12 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * Instant}, using the system's {@linkplain ZoneId#systemDefault() default time zone} as its
-   * source of time zone information. If you need a different time zone, consider other constants in
-   * this class, or call {@link #timestampAt(ZoneId)} instead.
+   * Instant}.
+   *
+   * <p>This codec uses the system's {@linkplain ZoneId#systemDefault() default time zone} as its
+   * source of time zone information when parsing literals that do not have any time zone
+   * indication. If you need a different time zone, consider other constants in this class, or call
+   * {@link #timestampAt(ZoneId)} instead.
    *
    * @see #TIMESTAMP_UTC
    * @see #timestampAt(ZoneId)
@@ -112,9 +115,11 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * Instant}, using {@link ZoneOffset#UTC} as its source of time zone information. If you need a
-   * different time zone, consider other constants in this class, or call {@link
-   * #timestampAt(ZoneId)} instead.
+   * Instant}.
+   *
+   * <p>This codec uses {@link ZoneOffset#UTC} as its source of time zone information when parsing
+   * literals that do not have any time zone indication. If you need a different time zone, consider
+   * other constants in this class, or call {@link #timestampAt(ZoneId)} instead.
    *
    * @see #TIMESTAMP
    * @see #timestampAt(ZoneId)
@@ -123,9 +128,12 @@ public class TypeCodecs {
 
   /**
    * A codec that maps CQL {@code timestamp} to Java {@code long}, representing the number of
-   * milliseconds since the Epoch, using the system's {@linkplain ZoneId#systemDefault() default
-   * time zone} as its source of time zone information. If you need a different time zone, consider
-   * other constants in this class, or call {@link #timestampMillisAt(ZoneId)} instead.
+   * milliseconds since the Epoch.
+   *
+   * <p>This codec uses the system's {@linkplain ZoneId#systemDefault() default time zone} as its
+   * source of time zone information when parsing literals that do not have any time zone
+   * indication. If you need a different time zone, consider other constants in this class, or call
+   * {@link #timestampMillisAt(ZoneId)} instead.
    *
    * <p>This codec can serve as a replacement for the driver's built-in {@linkplain #TIMESTAMP
    * timestamp} codec, when application code prefers to deal with raw milliseconds than with {@link
@@ -138,9 +146,11 @@ public class TypeCodecs {
 
   /**
    * A codec that maps CQL {@code timestamp} to Java {@code long}, representing the number of
-   * milliseconds since the Epoch, using {@link ZoneOffset#UTC} as its source of time zone
-   * information. If you need a different time zone, consider other constants in this class, or call
-   * {@link #timestampMillisAt(ZoneId)} instead.
+   * milliseconds since the Epoch.
+   *
+   * <p>This codec uses {@link ZoneOffset#UTC} as its source of time zone information when parsing
+   * literals that do not have any time zone indication. If you need a different time zone, consider
+   * other constants in this class, or call {@link #timestampMillisAt(ZoneId)} instead.
    *
    * <p>This codec can serve as a replacement for the driver's built-in {@linkplain #TIMESTAMP
    * timestamp} codec, when application code prefers to deal with raw milliseconds than with {@link
@@ -154,9 +164,12 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * ZonedDateTime}, using the system's {@linkplain ZoneId#systemDefault() default time zone} as its
-   * source of time zone information. If you need a different time zone, consider using other
-   * constants in this class, or call {@link #zonedTimestampAt(ZoneId)} instead.
+   * ZonedDateTime}.
+   *
+   * <p>This codec uses the system's {@linkplain ZoneId#systemDefault() default time zone} as its
+   * source of time zone information when parsing literals that do not have any time zone
+   * indication. If you need a different time zone, consider using other constants in this class, or
+   * call {@link #zonedTimestampAt(ZoneId)} instead.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; this codec is
    * provided merely as a convenience for users that need to deal with zoned timestamps in their
@@ -170,9 +183,11 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * ZonedDateTime}, using {@link ZoneOffset#UTC} as its source of time zone information. If you
-   * need a different time zone, consider using other constants in this class, or call {@link
-   * #zonedTimestampAt(ZoneId)} instead.
+   * ZonedDateTime}.
+   *
+   * <p>This codec uses {@link ZoneOffset#UTC} as its source of time zone information when parsing
+   * literals that do not have any time zone indication. If you need a different time zone, consider
+   * using other constants in this class, or call {@link #zonedTimestampAt(ZoneId)} instead.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; this codec is
    * provided merely as a convenience for users that need to deal with zoned timestamps in their
@@ -203,9 +218,12 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * LocalDateTime}, using the system's {@linkplain ZoneId#systemDefault() default time zone} as its
-   * source of time zone information. If you need a different time zone, consider using other
-   * constants in this class, or call {@link #localTimestampAt(ZoneId)} instead.
+   * LocalDateTime}.
+   *
+   * <p>This codec uses the system's {@linkplain ZoneId#systemDefault() default time zone} as its
+   * source of time zone information when parsing literals that do not have any time zone
+   * indication. If you need a different time zone, consider using other constants in this class, or
+   * call {@link #localTimestampAt(ZoneId)} instead.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; this codec is
    * provided merely as a convenience for users that need to deal with local date-times in their
@@ -218,9 +236,11 @@ public class TypeCodecs {
 
   /**
    * A codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * LocalDateTime}, using {@link ZoneOffset#UTC} as its source of time zone information.If you need
-   * a different time zone, consider using other constants in this class, or call {@link
-   * #localTimestampAt(ZoneId)} instead.
+   * LocalDateTime}.
+   *
+   * <p>This codec uses {@link ZoneOffset#UTC} as its source of time zone information when parsing
+   * literals that do not have any time zone indication.If you need a different time zone, consider
+   * using other constants in this class, or call {@link #localTimestampAt(ZoneId)} instead.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; this codec is
    * provided merely as a convenience for users that need to deal with local date-times in their
@@ -337,7 +357,10 @@ public class TypeCodecs {
 
   /**
    * Returns a codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * Instant}, using the supplied {@link ZoneId} as its source of time zone information.
+   * Instant}.
+   *
+   * <p>This codec uses the supplied {@link ZoneId} as its source of time zone information when
+   * parsing literals that do not have any time zone indication.
    *
    * @see #TIMESTAMP
    * @see #TIMESTAMP_UTC
@@ -349,8 +372,10 @@ public class TypeCodecs {
 
   /**
    * A codec that maps CQL {@code timestamp} to Java {@code long}, representing the number of
-   * milliseconds since the Epoch, using the supplied {@link ZoneId} as its source of time zone
-   * information.
+   * milliseconds since the Epoch.
+   *
+   * <p>This codec uses the supplied {@link ZoneId} as its source of time zone information when
+   * parsing literals that do not have any time zone indication.
    *
    * <p>This codec can serve as a replacement for the driver's built-in {@linkplain #TIMESTAMP
    * timestamp} codec, when application code prefers to deal with raw milliseconds than with {@link
@@ -366,7 +391,10 @@ public class TypeCodecs {
 
   /**
    * Returns a codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * ZonedDateTime}, using the supplied {@link ZoneId} as its source of time zone information.
+   * ZonedDateTime}.
+   *
+   * <p>This codec uses the supplied {@link ZoneId} as its source of time zone information when
+   * parsing literals that do not have any time zone indication.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; the codecs
    * created by this method are provided merely as a convenience for users that need to deal with
@@ -383,7 +411,10 @@ public class TypeCodecs {
 
   /**
    * Returns a codec that handles Apache Cassandra(R)'s timestamp type and maps it to Java's {@link
-   * LocalDateTime}, using the supplied {@link ZoneId} as its source of time zone information.
+   * LocalDateTime}.
+   *
+   * <p>This codec uses the supplied {@link ZoneId} as its source of time zone information when
+   * parsing literals that do not have any time zone indication.
    *
    * <p>Note that Apache Cassandra(R)'s timestamp type does not store any time zone; the codecs
    * created by this method are provided merely as a convenience for users that need to deal with

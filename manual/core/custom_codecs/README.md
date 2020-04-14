@@ -179,8 +179,8 @@ TypeCodec<Integer> weekDaysByNameCodec = TypeCodecs.enumOrdinalsOf(WeekDay.class
 
 The driver provides out-of-the-box support for mapping Java objects to CQL `text` using the popular
 Jackson library. The method [TypeCodecs.json(Class)] will create a codec for a given Java class that
-maps instances of that class to Json strings, using a newly-allocated, default [JsonMapper]. It is 
-also possible to pass a custom `JsonMapper` instance using [TypeCodecs.json(Class, JsonMapper)]
+maps instances of that class to Json strings, using a newly-allocated, default [ObjectMapper]. It is 
+also possible to pass a custom `ObjectMapper` instance using [TypeCodecs.json(Class, ObjectMapper)]
 instead.
 
 ### Writing codecs
@@ -629,8 +629,8 @@ private static String formatRow(Row row) {
 [TypeCodecs.enumNamesOf(Class)]: https://docs.datastax.com/en/drivers/java/4.8/com/datastax/oss/driver/api/core/type/codec/TypeCodecs.html#enumNamesOf-java.lang.Class-
 [TypeCodecs.enumOrdinalsOf(Class)]: https://docs.datastax.com/en/drivers/java/4.8/com/datastax/oss/driver/api/core/type/codec/TypeCodecs.html#enumOrdinalsOf-java.lang.Class-
 [TypeCodecs.json(Class)]: https://docs.datastax.com/en/drivers/java/4.8/com/datastax/oss/driver/api/core/type/codec/TypeCodecs.html#json-java.lang.Class-
-[TypeCodecs.json(Class, JsonMapper)]: https://docs.datastax.com/en/drivers/java/4.8/com/datastax/oss/driver/api/core/type/codec/TypeCodecs.html#json-java.lang.Class-com.fasterxml.jackson.databind.json.JsonMapper-
+[TypeCodecs.json(Class, ObjectMapper)]: https://docs.datastax.com/en/drivers/java/4.8/com/datastax/oss/driver/api/core/type/codec/TypeCodecs.html#json-java.lang.Class-com.fasterxml.jackson.databind.ObjectMapper-
 
-[JsonMapper]: http://fasterxml.github.io/jackson-databind/javadoc/2.10/com/fasterxml/jackson/databind/json/JsonMapper.html
+[ObjectMapper]: http://fasterxml.github.io/jackson-databind/javadoc/2.10/com/fasterxml/jackson/databind/ObjectMapper.html
 
 [CQL `blob` example]: https://github.com/datastax/java-driver/blob/4.x/examples/src/main/java/com/datastax/oss/driver/examples/datatypes/Blobs.java

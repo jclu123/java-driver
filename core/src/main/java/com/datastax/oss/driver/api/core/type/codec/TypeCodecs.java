@@ -68,7 +68,7 @@ import com.datastax.oss.driver.internal.core.type.codec.extras.time.TimestampMil
 import com.datastax.oss.driver.internal.core.type.codec.extras.time.ZonedTimestampCodec;
 import com.datastax.oss.driver.shaded.guava.common.base.Charsets;
 import com.datastax.oss.driver.shaded.guava.common.base.Preconditions;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -495,24 +495,25 @@ public class TypeCodecs {
 
   /**
    * Returns a codec that maps the given Java type to JSON strings, using the provided Jackson
-   * {@link JsonMapper} to perform serialization and deserialization of JSON objects.
+   * {@link ObjectMapper} to perform serialization and deserialization of JSON objects.
    *
    * @see <a href="http://wiki.fasterxml.com/JacksonHome">Jackson JSON Library</a>
    */
   @NonNull
   public static <T> TypeCodec<T> json(
-      @NonNull GenericType<T> javaType, @NonNull JsonMapper jsonMapper) {
-    return new JsonCodec<>(javaType, jsonMapper);
+      @NonNull GenericType<T> javaType, @NonNull ObjectMapper objectMapper) {
+    return new JsonCodec<>(javaType, objectMapper);
   }
 
   /**
    * Returns a codec that maps the given Java class to JSON strings, using the provided Jackson
-   * {@link JsonMapper} to perform serialization and deserialization of JSON objects.
+   * {@link ObjectMapper} to perform serialization and deserialization of JSON objects.
    *
    * @see <a href="http://wiki.fasterxml.com/JacksonHome">Jackson JSON Library</a>
    */
   @NonNull
-  public static <T> TypeCodec<T> json(@NonNull Class<T> javaType, @NonNull JsonMapper jsonMapper) {
-    return new JsonCodec<>(javaType, jsonMapper);
+  public static <T> TypeCodec<T> json(
+      @NonNull Class<T> javaType, @NonNull ObjectMapper objectMapper) {
+    return new JsonCodec<>(javaType, objectMapper);
   }
 }

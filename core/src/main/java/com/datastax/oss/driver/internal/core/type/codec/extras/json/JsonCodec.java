@@ -24,7 +24,7 @@ import com.datastax.oss.driver.internal.core.util.Strings;
 import com.datastax.oss.protocol.internal.util.Bytes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -52,18 +52,18 @@ import java.util.Objects;
  */
 public class JsonCodec<T> implements TypeCodec<T> {
 
-  private final JsonMapper jsonMapper;
+  private final ObjectMapper objectMapper;
   private final GenericType<T> javaType;
   private final JavaType jacksonJavaType;
 
   /**
    * Creates a new instance for the provided {@code javaClass}, using a default, newly-allocated
-   * {@link JsonMapper}.
+   * {@link ObjectMapper}.
    *
    * <p>The codec created with this constructor can handle all primitive CQL types as well as
    * collections thereof, however it cannot handle tuples and user-defined types; if you need
-   * support for such CQL types, you need to create your own {@link JsonMapper} and use the
-   * {@linkplain #JsonCodec(Class, JsonMapper) two-arg constructor} instead.
+   * support for such CQL types, you need to create your own {@link ObjectMapper} and use the
+   * {@linkplain #JsonCodec(Class, ObjectMapper) two-arg constructor} instead.
    *
    * @param javaClass the Java class this codec maps to.
    */
@@ -73,40 +73,42 @@ public class JsonCodec<T> implements TypeCodec<T> {
 
   /**
    * Creates a new instance for the provided {@code javaType}, using a default, newly-allocated
-   * {@link JsonMapper}.
+   * {@link ObjectMapper}.
    *
    * <p>The codec created with this constructor can handle all primitive CQL types as well as
    * collections thereof, however it cannot handle tuples and user-defined types; if you need
-   * support for such CQL types, you need to create your own {@link JsonMapper} and use the
-   * {@linkplain #JsonCodec(GenericType, JsonMapper) two-arg constructor} instead.
+   * support for such CQL types, you need to create your own {@link ObjectMapper} and use the
+   * {@linkplain #JsonCodec(GenericType, ObjectMapper) two-arg constructor} instead.
    *
    * @param javaType the Java type this codec maps to.
    */
   public JsonCodec(@NonNull GenericType<T> javaType) {
-    this(javaType, new JsonMapper());
+    this(javaType, new ObjectMapper());
   }
 
   /**
    * Creates a new instance for the provided {@code javaClass}, and using the provided {@link
-   * JsonMapper}.
+   * ObjectMapper}.
    *
    * @param javaClass the Java class this codec maps to.
-   * @param jsonMapper the {@link JsonMapper} instance to use.
+   * @param objectMapper the {@link ObjectMapper} instance to use.
    */
-  public JsonCodec(@NonNull Class<T> javaClass, @NonNull JsonMapper jsonMapper) {
-    this(GenericType.of(Objects.requireNonNull(javaClass, "javaClass cannot be null")), jsonMapper);
+  public JsonCodec(@NonNull Class<T> javaClass, @NonNull ObjectMapper objectMapper) {
+    this(
+        GenericType.of(Objects.requireNonNull(javaClass, "javaClass cannot be null")),
+        objectMapper);
   }
 
   /**
    * Creates a new instance for the provided {@code javaType}, and using the provided {@link
-   * JsonMapper}.
+   * ObjectMapper}.
    *
    * @param javaType the Java type this codec maps to.
-   * @param jsonMapper the {@link JsonMapper} instance to use.
+   * @param objectMapper the {@link ObjectMapper} instance to use.
    */
-  public JsonCodec(@NonNull GenericType<T> javaType, @NonNull JsonMapper jsonMapper) {
+  public JsonCodec(@NonNull GenericType<T> javaType, @NonNull ObjectMapper objectMapper) {
     this.javaType = Objects.requireNonNull(javaType, "javaType cannot be null");
-    this.jsonMapper = Objects.requireNonNull(jsonMapper, "jsonMapper cannot be null");
+    this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper cannot be null");
     this.jacksonJavaType = TypeFactory.defaultInstance().constructType(javaType.getType());
   }
 
@@ -129,7 +131,7 @@ public class JsonCodec<T> implements TypeCodec<T> {
       return null;
     }
     try {
-      return ByteBuffer.wrap(jsonMapper.writeValueAsBytes(value));
+      return ByteBuffer.wrap(objectMapper.writeValueAsBytes(value));
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Failed to encode value as JSON", e);
     }
@@ -142,7 +144,7 @@ public class JsonCodec<T> implements TypeCodec<T> {
       return null;
     }
     try {
-      return jsonMapper.readValue(Bytes.getArray(bytes), jacksonJavaType);
+      return objectMapper.readValue(Bytes.getArray(bytes), jacksonJavaType);
     } catch (IOException e) {
       throw new IllegalArgumentException("Failed to decode JSON value", e);
     }
@@ -156,7 +158,7 @@ public class JsonCodec<T> implements TypeCodec<T> {
     }
     String json;
     try {
-      json = jsonMapper.writeValueAsString(value);
+      json = objectMapper.writeValueAsString(value);
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException("Failed to format value as JSON", e);
     }
@@ -174,7 +176,7 @@ public class JsonCodec<T> implements TypeCodec<T> {
     }
     String json = Strings.unquote(value);
     try {
-      return jsonMapper.readValue(json, jacksonJavaType);
+      return objectMapper.readValue(json, jacksonJavaType);
     } catch (IOException e) {
       throw new IllegalArgumentException("Failed to parse value as JSON", e);
     }

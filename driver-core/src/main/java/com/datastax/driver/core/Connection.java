@@ -22,6 +22,7 @@ import com.datastax.driver.core.Responses.Result.SetKeyspace;
 import com.datastax.driver.core.exceptions.AuthenticationException;
 import com.datastax.driver.core.exceptions.BusyConnectionException;
 import com.datastax.driver.core.exceptions.ConnectionException;
+import com.datastax.driver.core.exceptions.CrcMismatchException;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.DriverInternalError;
 import com.datastax.driver.core.exceptions.FrameTooLongException;
@@ -60,14 +61,16 @@ import io.netty.handler.codec.DecoderException;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -95,6 +98,9 @@ class Connection {
       SystemProperties.getBoolean("com.datastax.driver.DISABLE_COALESCING", false);
   private static final int FLUSHER_SCHEDULE_PERIOD_NS =
       SystemProperties.getInt("com.datastax.driver.FLUSHER_SCHEDULE_PERIOD_NS", 10000);
+
+  private static final AttributeKey<RequestWriter> REQUEST_WRITER_KEY =
+      AttributeKey.newInstance("request_writer");
 
   enum State {
     OPEN,
@@ -223,6 +229,7 @@ class Connection {
                   logger.debug(
                       "{} Connection established, initializing transport", Connection.this);
                   channel.closeFuture().addListener(new ChannelCloseListener());
+                  channel.attr(REQUEST_WRITER_KEY).set(new LegacyRequestWriter(channel));
                   channelReadyFuture.set(null);
                 }
               }
@@ -345,6 +352,11 @@ class Connection {
     return new AsyncFunction<Message.Response, Void>() {
       @Override
       public ListenableFuture<Void> apply(Message.Response response) throws Exception {
+
+        if (protocolVersion.compareTo(ProtocolVersion.V5) >= 0 && response.type != ERROR) {
+          switchToV5Framing();
+        }
+
         switch (response.type) {
           case READY:
             return checkClusterName(protocolVersion, initExecutor);
@@ -776,6 +788,8 @@ class Connection {
     writer.incrementAndGet();
 
     if (DISABLE_COALESCING) {
+      // Note that this only works for protocol v4 and below. Starting with v5, the flusher *must*
+      // be enabled, because that's where the higher-level protocol "segments" are assembled.
       channel.writeAndFlush(request).addListener(writeHandler(request, handler));
     } else {
       flush(new FlushItem(channel, request, writeHandler(request, handler)));
@@ -1125,7 +1139,7 @@ class Connection {
     final WeakReference<EventLoop> eventLoopRef;
     final Queue<FlushItem> queued = new ConcurrentLinkedQueue<FlushItem>();
     final AtomicBoolean running = new AtomicBoolean(false);
-    final HashSet<Channel> channels = new HashSet<Channel>();
+    final Map<Channel, RequestWriter> requestWriters = new HashMap<Channel, RequestWriter>();
 
     private Flusher(EventLoop eventLoop) {
       this.eventLoopRef = new WeakReference<EventLoop>(eventLoop);
@@ -1145,14 +1159,20 @@ class Connection {
       while (null != (flush = queued.poll())) {
         Channel channel = flush.channel;
         if (channel.isActive()) {
-          channels.add(channel);
-          channel.write(flush.request).addListener(flush.listener);
+          RequestWriter writer = requestWriters.get(channel);
+          if (writer == null) {
+            writer = channel.attr(REQUEST_WRITER_KEY).get();
+            requestWriters.put(channel, writer);
+          }
+          writer.addRequest(((Message.Request) flush.request), flush.listener);
         }
       }
 
       // Always flush what we have (don't artificially delay to try to coalesce more messages)
-      for (Channel channel : channels) channel.flush();
-      channels.clear();
+      for (RequestWriter writer : requestWriters.values()) {
+        writer.flush();
+      }
+      requestWriters.clear();
 
       // either reschedule or cancel
       running.set(false);
@@ -1166,6 +1186,64 @@ class Connection {
           eventLoop.execute(this);
         }
       }
+    }
+  }
+
+  /** Abstracts the logic of writing requests to a channel in the flusher. */
+  interface RequestWriter {
+    /** The caller <b>must</b> invoke {@link #flush()} after the last request. */
+    void addRequest(Message.Request request, ChannelFutureListener writeListener);
+
+    void flush();
+  }
+
+  private static class LegacyRequestWriter implements RequestWriter {
+
+    private final Channel channel;
+
+    private LegacyRequestWriter(Channel channel) {
+      this.channel = channel;
+    }
+
+    @Override
+    public void addRequest(Message.Request request, ChannelFutureListener writeListener) {
+      channel.write(request).addListener(writeListener);
+    }
+
+    @Override
+    public void flush() {
+      channel.flush();
+    }
+  }
+
+  private static class V5RequestWriter extends SegmentBuilder {
+
+    private final Channel channel;
+
+    public V5RequestWriter(Channel channel, Message.ProtocolEncoder requestEncoder) {
+      super(channel.alloc(), requestEncoder);
+      this.channel = channel;
+    }
+
+    @Override
+    void processSegment(final Segment segment) {
+      channel
+          .write(segment)
+          .addListener(
+              new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                  for (ChannelFutureListener messageListener : segment.getWriteListeners()) {
+                    messageListener.operationComplete(future);
+                  }
+                }
+              });
+    }
+
+    @Override
+    public void flush() {
+      super.flush();
+      channel.flush();
     }
   }
 
@@ -1325,7 +1403,7 @@ class Connection {
         // Special case, if we encountered a FrameTooLongException, raise exception on handler and
         // don't defunct it since
         // the connection is in an ok state.
-        if (error != null && error instanceof FrameTooLongException) {
+        if (error instanceof FrameTooLongException) {
           FrameTooLongException ftle = (FrameTooLongException) error;
           int streamId = ftle.getStreamId();
           ResponseHandler handler = pending.remove(streamId);
@@ -1344,6 +1422,9 @@ class Connection {
           handler.callback.onException(
               Connection.this, ftle, System.nanoTime() - handler.startTime, handler.retryCount);
           return;
+        } else if (error instanceof CrcMismatchException) {
+          // Fall back to the defunct call below, but we want a clear warning in the logs
+          logger.warn("CRC mismatch while decoding a response, dropping the connection", error);
         }
       }
       defunct(
@@ -1711,7 +1792,11 @@ class Connection {
       pipeline.addLast("frameDecoder", new Frame.Decoder());
       pipeline.addLast("frameEncoder", frameEncoder);
 
-      if (compressor != null) {
+      if (compressor != null
+          // Frame-level compression is only done in legacy protocol versions. In V5 and above, it
+          // happens at a higher level ("segment" that groups multiple frames), so never install
+          // those handlers.
+          && protocolVersion.compareTo(ProtocolVersion.V5) < 0) {
         pipeline.addLast("frameDecompressor", new Frame.Decompressor(compressor));
         pipeline.addLast("frameCompressor", new Frame.Compressor(compressor));
       }
@@ -1742,6 +1827,38 @@ class Connection {
           throw new DriverInternalError("Unsupported protocol version " + protocolVersion);
       }
     }
+  }
+
+  /**
+   * Rearranges the pipeline to deal with the new framing structure in protocol v5 and above. This
+   * has to be done manually, because it only happens once we've confirmed that the server supports
+   * v5.
+   */
+  void switchToV5Framing() {
+    assert factory.protocolVersion.compareTo(ProtocolVersion.V5) >= 0;
+
+    // We want to do this on the event loop, to make sure it doesn't race with incoming requests
+    assert channel.eventLoop().inEventLoop();
+
+    ChannelPipeline pipeline = channel.pipeline();
+    SegmentCodec segmentCodec =
+        new SegmentCodec(
+            channel.alloc(), factory.configuration.getProtocolOptions().getCompression());
+
+    // On the outbound path, a new encoder replaces both messageEncoder and frameEncoder
+    SegmentToBytesEncoder segmentToBytesEncoder = new SegmentToBytesEncoder(segmentCodec);
+    pipeline.replace("frameEncoder", "segmentToBytesEncoder", segmentToBytesEncoder);
+    Message.ProtocolEncoder requestEncoder =
+        (Message.ProtocolEncoder) pipeline.remove("messageEncoder");
+
+    // On the inbound path, two new decoders replace frameDecoder
+    BytesToSegmentDecoder bytesToSegmentDecoder = new BytesToSegmentDecoder(segmentCodec);
+    SegmentToFrameDecoder segmentToFrameDecoder = new SegmentToFrameDecoder();
+    pipeline.replace("frameDecoder", "bytesToSegmentDecoder", bytesToSegmentDecoder);
+    pipeline.addAfter("bytesToSegmentDecoder", "segmentToFrameDecoder", segmentToFrameDecoder);
+
+    // We also need to inject new logic into the flusher.
+    channel.attr(REQUEST_WRITER_KEY).set(new V5RequestWriter(channel, requestEncoder));
   }
 
   /** A component that "owns" a connection, and should be notified when it dies. */

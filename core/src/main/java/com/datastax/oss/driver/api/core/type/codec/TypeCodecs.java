@@ -259,12 +259,12 @@ public class TypeCodecs {
    * A codec that maps the CQL type {@code blob} to the Java type {@link ByteBuffer}.
    *
    * <p>If you are looking for a codec mapping the CQL type {@code blob} to the Java type {@code
-   * byte[]}, you should use {@link #BLOB_SIMPLE} instead.
+   * byte[]}, you should use {@link #BLOB_TO_ARRAY} instead.
    *
    * <p>If you are looking for a codec mapping the CQL type {@code list<tinyint} to the Java type
    * {@code byte[]}, you should use {@link #BYTE_ARRAY} instead.
    *
-   * @see #BLOB_SIMPLE
+   * @see #BLOB_TO_ARRAY
    * @see #BYTE_ARRAY
    */
   public static final TypeCodec<ByteBuffer> BLOB = new BlobCodec();
@@ -281,7 +281,7 @@ public class TypeCodecs {
    * @see #BLOB
    * @see #BYTE_ARRAY
    */
-  public static final TypeCodec<byte[]> BLOB_SIMPLE = new SimpleBlobCodec();
+  public static final TypeCodec<byte[]> BLOB_TO_ARRAY = new SimpleBlobCodec();
 
   public static final TypeCodec<String> TEXT = new StringCodec(DataTypes.TEXT, Charsets.UTF_8);
   public static final TypeCodec<String> ASCII = new StringCodec(DataTypes.ASCII, Charsets.US_ASCII);
@@ -300,10 +300,10 @@ public class TypeCodecs {
    *
    * <p>Note that this codec is not suitable for reading CQL blobs as byte arrays. If you are
    * looking for a codec for the CQL type {@code blob}, you should use {@link #BLOB} or {@link
-   * #BLOB_SIMPLE} instead.
+   * #BLOB_TO_ARRAY} instead.
    *
    * @see #BLOB
-   * @see #BLOB_SIMPLE
+   * @see #BLOB_TO_ARRAY
    */
   public static final TypeCodec<byte[]> BYTE_ARRAY = new ByteArrayCodec();
 

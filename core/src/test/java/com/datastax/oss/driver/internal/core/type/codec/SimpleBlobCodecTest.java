@@ -30,7 +30,7 @@ public class SimpleBlobCodecTest extends CodecTestBase<byte[]> {
   private static final byte[] ARRAY = Bytes.getArray(Bytes.fromHexString("0xcafebabe"));
 
   public SimpleBlobCodecTest() {
-    this.codec = TypeCodecs.BLOB_SIMPLE;
+    this.codec = TypeCodecs.BLOB_TO_ARRAY;
   }
 
   @Test

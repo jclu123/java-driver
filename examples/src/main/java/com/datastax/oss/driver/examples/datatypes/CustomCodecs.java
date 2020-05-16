@@ -124,7 +124,7 @@ public class CustomCodecs {
 
   private static CqlSessionBuilder registerCodecs(CqlSessionBuilder builder) {
     return builder.addTypeCodecs(
-        TypeCodecs.BLOB_SIMPLE, // blob <-> byte[]
+        TypeCodecs.BLOB_TO_ARRAY, // blob <-> byte[]
         TypeCodecs.ZONED_TIMESTAMP_PERSISTED, // tuple<timestamp,text> <-> ZonedDateTime
         TypeCodecs.arrayOf(TypeCodecs.TEXT), // list<text> <-> String[]
         TypeCodecs.enumNamesOf(WeekDay.class), // text <-> MyEnum

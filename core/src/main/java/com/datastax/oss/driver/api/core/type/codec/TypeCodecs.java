@@ -51,14 +51,14 @@ import com.datastax.oss.driver.internal.core.type.codec.UdtCodec;
 import com.datastax.oss.driver.internal.core.type.codec.UuidCodec;
 import com.datastax.oss.driver.internal.core.type.codec.VarIntCodec;
 import com.datastax.oss.driver.internal.core.type.codec.extras.OptionalCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.BooleanArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.ByteArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.DoubleArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.FloatArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.IntArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.LongArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.ObjectArrayCodec;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.ShortArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.BooleanListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.ByteListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.DoubleListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.FloatListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.IntListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.LongListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.ObjectListToArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.ShortListToArrayCodec;
 import com.datastax.oss.driver.internal.core.type.codec.extras.enums.EnumNameCodec;
 import com.datastax.oss.driver.internal.core.type.codec.extras.enums.EnumOrdinalCodec;
 import com.datastax.oss.driver.internal.core.type.codec.extras.json.JsonCodec;
@@ -262,10 +262,10 @@ public class TypeCodecs {
    * byte[]}, you should use {@link #BLOB_TO_ARRAY} instead.
    *
    * <p>If you are looking for a codec mapping the CQL type {@code list<tinyint} to the Java type
-   * {@code byte[]}, you should use {@link #BYTE_ARRAY} instead.
+   * {@code byte[]}, you should use {@link #BYTE_LIST_TO_ARRAY} instead.
    *
    * @see #BLOB_TO_ARRAY
-   * @see #BYTE_ARRAY
+   * @see #BYTE_LIST_TO_ARRAY
    */
   public static final TypeCodec<ByteBuffer> BLOB = new BlobCodec();
 
@@ -276,10 +276,10 @@ public class TypeCodecs {
    * ByteBuffer}, you should use {@link #BLOB} instead.
    *
    * <p>If you are looking for a codec mapping the CQL type {@code list<tinyint} to the Java type
-   * {@code byte[]}, you should use {@link #BYTE_ARRAY} instead.
+   * {@code byte[]}, you should use {@link #BYTE_LIST_TO_ARRAY} instead.
    *
    * @see #BLOB
-   * @see #BYTE_ARRAY
+   * @see #BYTE_LIST_TO_ARRAY
    */
   public static final TypeCodec<byte[]> BLOB_TO_ARRAY = new SimpleBlobCodec();
 
@@ -293,7 +293,7 @@ public class TypeCodecs {
   public static final TypeCodec<CqlDuration> DURATION = new CqlDurationCodec();
 
   /** A codec that maps CQL {@code list<boolean>} to Java {@code boolean[]}. */
-  public static final TypeCodec<boolean[]> BOOLEAN_ARRAY = new BooleanArrayCodec();
+  public static final TypeCodec<boolean[]> BOOLEAN_ARRAY = new BooleanListToArrayCodec();
 
   /**
    * A codec that maps CQL {@code list<tinyint>} to Java {@code byte[]}.
@@ -305,22 +305,22 @@ public class TypeCodecs {
    * @see #BLOB
    * @see #BLOB_TO_ARRAY
    */
-  public static final TypeCodec<byte[]> BYTE_ARRAY = new ByteArrayCodec();
+  public static final TypeCodec<byte[]> BYTE_LIST_TO_ARRAY = new ByteListToArrayCodec();
 
   /** A codec that maps CQL {@code list<smallint>} to Java {@code short[]}. */
-  public static final TypeCodec<short[]> SHORT_ARRAY = new ShortArrayCodec();
+  public static final TypeCodec<short[]> SHORT_LIST_TO_ARRAY = new ShortListToArrayCodec();
 
   /** A codec that maps CQL {@code list<int>} to Java {@code int[]}. */
-  public static final TypeCodec<int[]> INT_ARRAY = new IntArrayCodec();
+  public static final TypeCodec<int[]> INT_LIST_TO_ARRAY = new IntListToArrayCodec();
 
   /** A codec that maps CQL {@code list<bigint>} to Java {@code long[]}. */
-  public static final TypeCodec<long[]> LONG_ARRAY = new LongArrayCodec();
+  public static final TypeCodec<long[]> LONG_LIST_TO_ARRAY = new LongListToArrayCodec();
 
   /** A codec that maps CQL {@code list<float>} to Java {@code float[]}. */
-  public static final TypeCodec<float[]> FLOAT_ARRAY = new FloatArrayCodec();
+  public static final TypeCodec<float[]> FLOAT_LIST_TO_ARRAY = new FloatListToArrayCodec();
 
   /** A codec that maps CQL {@code list<double>} to Java {@code double[]}. */
-  public static final TypeCodec<double[]> DOUBLE_ARRAY = new DoubleArrayCodec();
+  public static final TypeCodec<double[]> DOUBLE_LIST_TO_ARRAY = new DoubleListToArrayCodec();
 
   @NonNull
   public static TypeCodec<ByteBuffer> custom(@NonNull DataType cqlType) {
@@ -433,12 +433,12 @@ public class TypeCodecs {
    * elements in the array is delegated to the provided element codec.
    *
    * <p>This method is not suitable for Java primitive arrays. Use {@link #BOOLEAN_ARRAY}, {@link
-   * #BYTE_ARRAY}, {@link #SHORT_ARRAY}, {@link #INT_ARRAY}, {@link #LONG_ARRAY}, {@link
-   * #FLOAT_ARRAY} or {@link #DOUBLE_ARRAY} instead.
+   * #BYTE_LIST_TO_ARRAY}, {@link #SHORT_LIST_TO_ARRAY}, {@link #INT_LIST_TO_ARRAY}, {@link
+   * #LONG_LIST_TO_ARRAY}, {@link #FLOAT_LIST_TO_ARRAY} or {@link #DOUBLE_LIST_TO_ARRAY} instead.
    */
   @NonNull
-  public static <T> TypeCodec<T[]> arrayOf(@NonNull TypeCodec<T> elementCodec) {
-    return new ObjectArrayCodec<>(elementCodec);
+  public static <T> TypeCodec<T[]> listToArrayOf(@NonNull TypeCodec<T> elementCodec) {
+    return new ObjectListToArrayCodec<>(elementCodec);
   }
 
   /**

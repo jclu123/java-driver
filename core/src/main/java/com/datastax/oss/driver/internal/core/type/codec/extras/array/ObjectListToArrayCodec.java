@@ -34,17 +34,17 @@ import net.jcip.annotations.Immutable;
  * following:
  *
  * <pre>{@code
- * ObjectArrayCodec<String> stringArrayCodec = new ObjectArrayCodec<>(TypeCodecs.TEXT);
+ * ObjectListToArrayCodec<String> stringArrayCodec = new ObjectListToArrayCodec<>(TypeCodecs.TEXT);
  * }</pre>
  *
  * @param <ElementT> The Java array component type this codec handles
  */
 @Immutable
-public class ObjectArrayCodec<ElementT> extends AbstractArrayCodec<ElementT[]> {
+public class ObjectListToArrayCodec<ElementT> extends AbstractListToArrayCodec<ElementT[]> {
 
   private final TypeCodec<ElementT> elementCodec;
 
-  public ObjectArrayCodec(@NonNull TypeCodec<ElementT> elementCodec) {
+  public ObjectListToArrayCodec(@NonNull TypeCodec<ElementT> elementCodec) {
     super(
         DataTypes.listOf(
             Objects.requireNonNull(elementCodec, "elementCodec must not be null").getCqlType()),

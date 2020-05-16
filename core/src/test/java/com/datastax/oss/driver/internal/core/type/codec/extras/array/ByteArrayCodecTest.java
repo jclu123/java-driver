@@ -27,7 +27,7 @@ public class ByteArrayCodecTest extends CodecTestBase<byte[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.BYTE_ARRAY;
+    codec = TypeCodecs.BYTE_LIST_TO_ARRAY;
   }
 
   @Test

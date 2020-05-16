@@ -32,9 +32,9 @@ import net.jcip.annotations.Immutable;
  * List} object.
  */
 @Immutable
-public class DoubleArrayCodec extends AbstractPrimitiveArrayCodec<double[]> {
+public class DoubleListToArrayCodec extends AbstractPrimitiveListToArrayCodec<double[]> {
 
-  public DoubleArrayCodec() {
+  public DoubleListToArrayCodec() {
     super(DataTypes.listOf(DataTypes.DOUBLE), GenericType.of(double[].class));
   }
 

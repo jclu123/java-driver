@@ -31,7 +31,7 @@ import java.util.Objects;
  *
  * @param <ArrayT> The Java array type this codec handles
  */
-public abstract class AbstractArrayCodec<ArrayT> implements TypeCodec<ArrayT> {
+public abstract class AbstractListToArrayCodec<ArrayT> implements TypeCodec<ArrayT> {
 
   @NonNull protected final ListType cqlType;
   @NonNull protected final GenericType<ArrayT> javaType;
@@ -40,7 +40,8 @@ public abstract class AbstractArrayCodec<ArrayT> implements TypeCodec<ArrayT> {
    * @param cqlType The CQL type. Must be a list type.
    * @param arrayType The Java type. Must be an array class.
    */
-  protected AbstractArrayCodec(@NonNull ListType cqlType, @NonNull GenericType<ArrayT> arrayType) {
+  protected AbstractListToArrayCodec(
+      @NonNull ListType cqlType, @NonNull GenericType<ArrayT> arrayType) {
     this.cqlType = Objects.requireNonNull(cqlType, "cqlType cannot be null");
     this.javaType = Objects.requireNonNull(arrayType, "arrayType cannot be null");
     if (!arrayType.isArray()) {

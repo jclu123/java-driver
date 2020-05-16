@@ -31,14 +31,14 @@ import java.util.Objects;
  *
  * @param <PrimitiveArrayT> The Java primitive array type this codec handles
  */
-public abstract class AbstractPrimitiveArrayCodec<PrimitiveArrayT>
-    extends AbstractArrayCodec<PrimitiveArrayT> {
+public abstract class AbstractPrimitiveListToArrayCodec<PrimitiveArrayT>
+    extends AbstractListToArrayCodec<PrimitiveArrayT> {
 
   /**
    * @param cqlType The CQL type. Must be a list type.
    * @param javaClass The Java type. Must be an array class.
    */
-  protected AbstractPrimitiveArrayCodec(
+  protected AbstractPrimitiveListToArrayCodec(
       @NonNull ListType cqlType, @NonNull GenericType<PrimitiveArrayT> javaClass) {
     super(cqlType, javaClass);
     GenericType<?> componentType = Objects.requireNonNull(javaClass.getComponentType());

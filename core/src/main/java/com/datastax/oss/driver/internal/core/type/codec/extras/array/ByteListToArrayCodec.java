@@ -36,9 +36,9 @@ import net.jcip.annotations.Immutable;
  * object.
  */
 @Immutable
-public class ByteArrayCodec extends AbstractPrimitiveArrayCodec<byte[]> {
+public class ByteListToArrayCodec extends AbstractPrimitiveListToArrayCodec<byte[]> {
 
-  public ByteArrayCodec() {
+  public ByteListToArrayCodec() {
     super(DataTypes.listOf(DataTypes.SMALLINT), GenericType.of(byte[].class));
   }
 

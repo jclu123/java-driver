@@ -27,7 +27,7 @@ public class DoubleArrayCodecTest extends CodecTestBase<double[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.DOUBLE_ARRAY;
+    codec = TypeCodecs.DOUBLE_LIST_TO_ARRAY;
   }
 
   @Test

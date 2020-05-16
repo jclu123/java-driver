@@ -126,7 +126,7 @@ public class CustomCodecs {
     return builder.addTypeCodecs(
         TypeCodecs.BLOB_TO_ARRAY, // blob <-> byte[]
         TypeCodecs.ZONED_TIMESTAMP_PERSISTED, // tuple<timestamp,text> <-> ZonedDateTime
-        TypeCodecs.arrayOf(TypeCodecs.TEXT), // list<text> <-> String[]
+        TypeCodecs.listToArrayOf(TypeCodecs.TEXT), // list<text> <-> String[]
         TypeCodecs.enumNamesOf(WeekDay.class), // text <-> MyEnum
         TypeCodecs.optionalOf(TypeCodecs.INET), // uuid <-> Optional<InetAddress>
         new CqlIntToStringCodec() // custom codec, int <-> String

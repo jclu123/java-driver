@@ -24,67 +24,68 @@ import java.util.Objects;
 import net.jcip.annotations.Immutable;
 
 /**
- * A codec that maps the CQL type {@code list<short>} to the Java type {@code short[]}.
+ * A codec that maps the CQL type {@code list<long>} to the Java type {@code long[]}.
  *
  * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
- * {@code short[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
- * short} values; it also instantiates arrays without the need for an intermediary Java {@code List}
+ * {@code long[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code long}
+ * values; it also instantiates arrays without the need for an intermediary Java {@code List}
  * object.
  */
 @Immutable
-public class ShortArrayCodec extends AbstractPrimitiveArrayCodec<short[]> {
+public class LongListToArrayCodec extends AbstractPrimitiveListToArrayCodec<long[]> {
 
-  public ShortArrayCodec() {
-    super(DataTypes.listOf(DataTypes.SMALLINT), GenericType.of(short[].class));
+  public LongListToArrayCodec() {
+    super(DataTypes.listOf(DataTypes.BIGINT), GenericType.of(long[].class));
   }
 
   @Override
   public boolean accepts(@NonNull Class<?> javaClass) {
-    return short[].class.equals(javaClass);
+    Objects.requireNonNull(javaClass);
+    return long[].class.equals(javaClass);
   }
 
   @Override
   public boolean accepts(@NonNull Object value) {
     Objects.requireNonNull(value);
-    return value instanceof short[];
+    return value instanceof long[];
   }
 
   @Override
   protected int sizeOfComponentType() {
-    return 2;
+    return 8;
   }
 
   @Override
   protected void serializeElement(
       @NonNull ByteBuffer output,
-      @NonNull short[] array,
+      @NonNull long[] array,
       int index,
       @NonNull ProtocolVersion protocolVersion) {
-    output.putShort(array[index]);
+    output.putLong(array[index]);
   }
 
   @Override
   protected void deserializeElement(
       @NonNull ByteBuffer input,
-      @NonNull short[] array,
+      @NonNull long[] array,
       int index,
       @NonNull ProtocolVersion protocolVersion) {
-    array[index] = input.getShort();
+    array[index] = input.getLong();
   }
 
   @Override
-  protected void formatElement(@NonNull StringBuilder output, @NonNull short[] array, int index) {
+  protected void formatElement(@NonNull StringBuilder output, @NonNull long[] array, int index) {
     output.append(array[index]);
   }
 
   @Override
-  protected void parseElement(@NonNull String input, @NonNull short[] array, int index) {
-    array[index] = Short.parseShort(input);
+  protected void parseElement(@NonNull String input, @NonNull long[] array, int index) {
+    array[index] = Long.parseLong(input);
   }
 
   @NonNull
   @Override
-  protected short[] newInstance(int size) {
-    return new short[size];
+  protected long[] newInstance(int size) {
+    return new long[size];
   }
 }

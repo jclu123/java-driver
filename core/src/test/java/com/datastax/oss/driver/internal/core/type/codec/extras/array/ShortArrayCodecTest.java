@@ -27,7 +27,7 @@ public class ShortArrayCodecTest extends CodecTestBase<short[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.SHORT_ARRAY;
+    codec = TypeCodecs.SHORT_LIST_TO_ARRAY;
   }
 
   @Test

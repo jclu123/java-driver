@@ -32,12 +32,12 @@ import net.jcip.annotations.Immutable;
  * List} object.
  */
 @Immutable
-public class BooleanArrayCodec extends AbstractPrimitiveArrayCodec<boolean[]> {
+public class BooleanListToArrayCodec extends AbstractPrimitiveListToArrayCodec<boolean[]> {
 
   private static final byte TRUE = (byte) 1;
   private static final byte FALSE = (byte) 0;
 
-  public BooleanArrayCodec() {
+  public BooleanListToArrayCodec() {
     super(DataTypes.listOf(DataTypes.BOOLEAN), GenericType.of(boolean[].class));
   }
 

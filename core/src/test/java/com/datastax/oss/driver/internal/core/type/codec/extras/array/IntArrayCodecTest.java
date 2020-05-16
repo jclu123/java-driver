@@ -27,7 +27,7 @@ public class IntArrayCodecTest extends CodecTestBase<int[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.INT_ARRAY;
+    codec = TypeCodecs.INT_LIST_TO_ARRAY;
   }
 
   @Test

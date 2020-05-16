@@ -27,7 +27,7 @@ public class FloatArrayCodecTest extends CodecTestBase<float[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.FLOAT_ARRAY;
+    codec = TypeCodecs.FLOAT_LIST_TO_ARRAY;
   }
 
   @Test

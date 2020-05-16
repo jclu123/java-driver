@@ -39,7 +39,7 @@ public class ObjectArrayCodecTest extends CodecTestBase<String[]> {
     MockitoAnnotations.initMocks(this);
     when(elementCodec.getCqlType()).thenReturn(DataTypes.TEXT);
     when(elementCodec.getJavaType()).thenReturn(GenericType.STRING);
-    codec = TypeCodecs.arrayOf(elementCodec);
+    codec = TypeCodecs.listToArrayOf(elementCodec);
   }
 
   @Test

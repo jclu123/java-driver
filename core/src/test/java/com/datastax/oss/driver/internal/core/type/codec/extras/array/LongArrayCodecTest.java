@@ -27,7 +27,7 @@ public class LongArrayCodecTest extends CodecTestBase<long[]> {
 
   @Before
   public void setup() {
-    codec = TypeCodecs.LONG_ARRAY;
+    codec = TypeCodecs.LONG_LIST_TO_ARRAY;
   }
 
   @Test

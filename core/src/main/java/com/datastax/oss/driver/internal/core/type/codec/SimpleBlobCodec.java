@@ -19,7 +19,7 @@ import com.datastax.oss.driver.api.core.data.ByteUtils;
 import com.datastax.oss.driver.api.core.type.codec.MappingCodec;
 import com.datastax.oss.driver.api.core.type.codec.TypeCodecs;
 import com.datastax.oss.driver.api.core.type.reflect.GenericType;
-import com.datastax.oss.driver.internal.core.type.codec.extras.array.ByteArrayCodec;
+import com.datastax.oss.driver.internal.core.type.codec.extras.array.ByteListToArrayCodec;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.nio.ByteBuffer;
@@ -32,7 +32,7 @@ import net.jcip.annotations.Immutable;
  * ByteBuffer}, you should use {@link BlobCodec} instead.
  *
  * <p>If you are looking for a codec mapping the CQL type {@code list<tinyint} to the Java type
- * {@code byte[]}, you should use {@link ByteArrayCodec} instead.
+ * {@code byte[]}, you should use {@link ByteListToArrayCodec} instead.
  */
 @Immutable
 public class SimpleBlobCodec extends MappingCodec<ByteBuffer, byte[]> {

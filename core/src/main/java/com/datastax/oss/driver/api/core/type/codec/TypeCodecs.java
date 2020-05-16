@@ -292,34 +292,81 @@ public class TypeCodecs {
   public static final TypeCodec<InetAddress> INET = new InetCodec();
   public static final TypeCodec<CqlDuration> DURATION = new CqlDurationCodec();
 
-  /** A codec that maps CQL {@code list<boolean>} to Java {@code boolean[]}. */
+  /**
+   * A codec that maps CQL {@code list<boolean>} to Java {@code boolean[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code boolean[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * boolean} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
+   */
   public static final TypeCodec<boolean[]> BOOLEAN_ARRAY = new BooleanListToArrayCodec();
 
   /**
    * A codec that maps CQL {@code list<tinyint>} to Java {@code byte[]}.
    *
-   * <p>Note that this codec is not suitable for reading CQL blobs as byte arrays. If you are
-   * looking for a codec for the CQL type {@code blob}, you should use {@link #BLOB} or {@link
-   * #BLOB_TO_ARRAY} instead.
+   * <p>This codec is not suitable for reading CQL blobs as byte arrays. If you are looking for a
+   * codec for the CQL type {@code blob}, you should use {@link #BLOB} or {@link #BLOB_TO_ARRAY}
+   * instead.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code byte[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * byte} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
    *
    * @see #BLOB
    * @see #BLOB_TO_ARRAY
    */
   public static final TypeCodec<byte[]> BYTE_LIST_TO_ARRAY = new ByteListToArrayCodec();
 
-  /** A codec that maps CQL {@code list<smallint>} to Java {@code short[]}. */
+  /**
+   * A codec that maps CQL {@code list<smallint>} to Java {@code short[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code short[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * short} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
+   */
   public static final TypeCodec<short[]> SHORT_LIST_TO_ARRAY = new ShortListToArrayCodec();
 
-  /** A codec that maps CQL {@code list<int>} to Java {@code int[]}. */
+  /**
+   * A codec that maps CQL {@code list<int>} to Java {@code int[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code int[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code int}
+   * values; it also instantiates arrays without the need for an intermediary Java {@code List}
+   * object.
+   */
   public static final TypeCodec<int[]> INT_LIST_TO_ARRAY = new IntListToArrayCodec();
 
-  /** A codec that maps CQL {@code list<bigint>} to Java {@code long[]}. */
+  /**
+   * A codec that maps CQL {@code list<bigint>} to Java {@code long[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code long[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * long} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
+   */
   public static final TypeCodec<long[]> LONG_LIST_TO_ARRAY = new LongListToArrayCodec();
 
-  /** A codec that maps CQL {@code list<float>} to Java {@code float[]}. */
+  /**
+   * A codec that maps CQL {@code list<float>} to Java {@code float[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code float[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * float} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
+   */
   public static final TypeCodec<float[]> FLOAT_LIST_TO_ARRAY = new FloatListToArrayCodec();
 
-  /** A codec that maps CQL {@code list<double>} to Java {@code double[]}. */
+  /**
+   * A codec that maps CQL {@code list<double>} to Java {@code double[]}.
+   *
+   * <p>Note that this codec is designed for performance and converts CQL lists <em>directly</em> to
+   * {@code double[]}, thus avoiding any unnecessary boxing and unboxing of Java primitive {@code
+   * double} values; it also instantiates arrays without the need for an intermediary Java {@code
+   * List} object.
+   */
   public static final TypeCodec<double[]> DOUBLE_LIST_TO_ARRAY = new DoubleListToArrayCodec();
 
   @NonNull

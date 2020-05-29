@@ -78,6 +78,22 @@ public class BytesToSegmentDecoderTest {
   }
 
   @Test(groups = "unit")
+  public void should_decode_segment_from_multiple_incoming_chunks() {
+    channel.pipeline().addLast(newDecoder(Compression.NONE));
+    // Send the header in two slices, to cover the case where the length can't be read the first
+    // time:
+    ByteBuf headerStart = REGULAR_HEADER.slice(0, 3);
+    ByteBuf headerEnd = REGULAR_HEADER.slice(3, 3);
+    channel.writeInbound(headerStart);
+    channel.writeInbound(headerEnd);
+    channel.writeInbound(REGULAR_PAYLOAD.duplicate());
+    channel.writeInbound(REGULAR_TRAILER.duplicate());
+    Segment segment = (Segment) channel.readInbound();
+    assertThat(segment.isSelfContained()).isTrue();
+    assertThat(segment.getPayload()).isEqualTo(REGULAR_PAYLOAD);
+  }
+
+  @Test(groups = "unit")
   public void should_decode_compressed_segment() {
     channel.pipeline().addLast(newDecoder(Compression.LZ4));
     // We need a contiguous buffer for this one, because of how our decompressor operates
@@ -115,6 +131,7 @@ public class BytesToSegmentDecoderTest {
   }
 
   private static ByteBuf byteBuf(String hex) {
-    return Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex));
+    return Unpooled.unreleasableBuffer(
+        Unpooled.unmodifiableBuffer(Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex))));
   }
 }

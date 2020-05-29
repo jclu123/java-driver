@@ -52,11 +52,18 @@ class BytesToSegmentDecoder extends LengthFieldBasedFrameDecoder {
 
   @Override
   protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-    ByteBuf payloadAndCrc = (ByteBuf) super.decode(ctx, in);
-    assert header != null;
+    ByteBuf payloadAndCrc;
+    try {
+      payloadAndCrc = (ByteBuf) super.decode(ctx, in);
+    } catch (Exception e) {
+      // Don't hold on to a stale header if the parent method discarded the "frame"
+      header = null;
+      throw e;
+    }
     if (payloadAndCrc == null) {
       return null;
     } else {
+      assert header != null;
       Segment segment = segmentCodec.decode(header, payloadAndCrc);
       header = null;
       return segment;
@@ -65,8 +72,11 @@ class BytesToSegmentDecoder extends LengthFieldBasedFrameDecoder {
 
   @Override
   protected long getUnadjustedFrameLength(ByteBuf buffer, int offset, int length, ByteOrder order) {
-    assert header == null;
-    header = segmentCodec.decodeHeader(buffer.slice(offset, length));
+    // The parent class calls this repeatedly for the same "frame" if there weren't enough
+    // accumulated bytes the first time. Only decode the header the first time:
+    if (header == null) {
+      header = segmentCodec.decodeHeader(buffer.slice(offset, length));
+    }
     return header.payloadLength;
   }
 }
